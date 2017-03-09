@@ -1,0 +1,244 @@
+body {
+	margin: 0 auto;
+	padding: 0;
+	background: #FFF;
+	font-family: arial, helvetica, sans;
+}
+
+a {
+	color: #006E97;
+	text-decoration: none;
+	cursor: pointer;
+	cursor: hand;
+	border-bottom: 0px solid #556164;
+}
+
+a:hover {
+	text-decoration: none;
+}
+
+ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.path {
+background-image: url(../images/wz_06.gif);
+background-repeat: no-repeat;
+background-position: 10px center;
+padding-left: 35px;
+color:#154BA0;
+}
+
+/* Header */
+#header {
+	float: left;
+	display: inline;
+	width: 100%;
+	min-width: 980px;
+	background: #005774;
+	padding: 0;
+	margin: 0 0 10px 0;
+	height: auto;
+	overflow: visible;
+}
+
+#masthead {
+	width: auto;
+	margin: 0;
+	clear: both;
+	overflow: visible;
+	z-index: 16777267;
+	position: relative;
+	font-weight: bold;
+	font-size: 26px;
+	color: white;
+	text-align: center;
+}
+
+#logo {
+	font-weight: bold;
+	font-size: 26px;
+	color: white;
+	text-align: center;
+}
+
+#logo_img {
+	
+	background: url('../images/logo.png') no-repeat center ;
+	border: 0;
+	
+}
+/*  Nav */
+#nav-item-li {
+	white-space: nowrap; /*瀵搫鍩楁稉宥嗗床鐞涳拷*/
+	*overflow: hidden; /*閼奉亜濮╅梾鎰閺傚洤鐡�*/
+	text-overflow: ellipsis; /*閺傚洤鐡ч梾鎰閸氬孩鍧婇崝鐘垫阜閻ｃ儱褰�*/
+	-o-text-overflow: ellipsis; /*闁倻鏁ゆ禍宸損era濞村繗顫嶉崳锟�*/
+	z-index: 100;
+}
+
+#dd-navigation {
+	background: url('../images/nav-bg.png') repeat-x;
+	clear: both;
+	border-bottom: 1px solid #556164;
+	z-index: 100;
+	position: relative;
+}
+
+#nav-strip ul li.nav-item,#nav-strip ul li.nav-item.active,#nav-strip ul li.nav-item:hover
+	{
+	border-right: solid 1px #79dbe1;
+	border-left: solid 1px #0d6b86;
+}
+
+#nav-strip {
+	clear: both;
+	margin: 0 auto;
+	width: auto;
+	height: 32px;
+	line-height: 21px;
+	position: relative;
+	z-index: 16777265;
+	border-right: solid 1px #0d6b86;
+	border-left: solid 1px #79dbe1;
+}
+
+#nav-strip a:hover {
+	text-decoration: none;
+}
+
+#nav-strip ul li.nav-item {
+	display: inline;
+	float: left;
+	position: relative;
+	min-width:115px;
+	width: auto;
+	height: 32px;
+	text-align: center;
+}
+
+#nav-strip ul li.nav-item.active {
+	background-color: #91dce1;
+	background: url('../images/nav-hover.png') repeat-x;
+}
+
+#nav-strip ul li.nav-item:hover,#nav-strip ul li.nav-item.hover {
+	background: #3DA7C6;
+}
+
+#nav-strip ul li.nav-item:hover a,#nav-strip ul li.nav-item.hover a {
+	color: #fff;
+}
+
+#nav-strip ul li.nav-item.active a {
+	color: #000;
+}
+
+#nav-strip ul li a {
+	font-weight: bold;
+	color: #FFFFFF;
+	display: block;
+	padding: 5px;
+	font-size: 12px;
+	outline: none;
+	border-bottom: 1px solid #556164;
+}
+
+#nav-strip ul li a .primary-link,#nav-strip ul li.active a .primary-link,#nav-strip ul li.hover a .primary-link
+	{
+	background: url('../images/sprite-nav.gif') 100% -10px no-repeat
+		transparent;
+	padding-right: 10px;
+}
+
+#nav-strip ul li.no-subnav a .primary-link {
+	background: none;
+	padding-right: 0;
+}
+
+#nav-strip ul li .subnav {
+	display: none;
+	position: absolute;
+	top: 33px;
+	left: -1px;
+	padding-bottom: 0px;
+	background: #ceebf2;
+	border: 1px #ccc solid;
+	z-index: 16777263;
+	*min-width: 160px;
+}
+
+#nav-strip .subnav-inner {
+	float: left;
+	*min-width: 160px;
+}
+
+#nav-strip ul li .subnav ul {
+	float: left;
+	min-width: 160px;
+	margin: 0;
+}
+
+#nav-strip ul li .subnav ul li {
+	display: block;
+	border-left: none;
+	border-right: none;
+	float: none;
+	margin: 0px 1px;
+	padding: 0;
+}
+/* double list view */
+#nav-strip ul li .subnav ul.one {
+	width: auto;
+	margin-bottom: 0px;
+}
+
+#nav-strip ul li .subnav ul.one li {
+	margin: 0;
+}
+
+#nav-strip ul li .subnav ul.one li a {
+	font-weight: normal;
+}
+
+#nav-strip ul li .subnav ul li a,#nav-strip ul li.nav-item:hover .subnav ul li a
+	{
+	font-size: 12px;
+	color: #214181;
+	white-space: nowrap;
+	*white-space: normal;
+	_white-space: nowrap;
+	padding: 6px 10px;
+	text-align: left;
+	height: 19px;
+}
+
+#nav-strip ul li .subnav ul li a,#nav-strip ul li.nav-item:hover .subnav ul li a
+	{
+	white-space: nowrap;
+}
+
+#nav-strip ul li .subnav ul li.active a,#nav-strip ul li .subnav ul li a:hover
+	{
+	color: #FFFFFF !important;
+	text-decoration: none;
+	background: url(../images/menu_over2.jpg) repeat-x;
+}
+
+#div1{
+	display:block;
+	
+}
+
+#div2{
+	
+	display:none;
+}
+#footer_div1{
+	background:#f2f2f2;
+	margin-top:265px;
+	color:#a6a6a6;
+	
+}

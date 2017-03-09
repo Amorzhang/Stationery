@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<applications xmlns="http://www.wabacus.com"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.wabacus.com ../xsd/wabacus.applications.xsd">
+	<page xmlns="http://www.wabacus.com" id="directory" js="/webresources/script/wabacus_system.js,/webresources/script/validate.js,/webresources/script/testcallback.js">
+		<header>${top.header}</header>
+		<vpanel id="common_vpanel" width="1000px" align="center" title="">
+			<report id="title" extends="title.report1"></report>
+			<report id="report1" rowselect="checkbox" title="办公用品字典" type="editablelist2"
+				pagesize="8">
+				<display>
+					<col column="{sequence:1}" label="序号"></col>
+					<col column="off_id" label="ID" filter="true" displaytype="hidden"></col>
+					<col column="off_name" label="办公用品名称">
+					<inputbox styleproperty="style='width:99%'" jsvalidate="isNotEmpty(${invalid.isnotempty})"></inputbox>
+					</col>
+					<col column="off_price" label="单价(元)">
+					<inputbox styleproperty="style='width:99%'" jsvalidate="isNotEmpty(${invalid.isnotempty})"></inputbox>
+					</col>
+					<col column="off_unit" label="单位">
+					<inputbox styleproperty="style='width:99%'" jsvalidate="isNotEmpty(${invalid.isnotempty})"></inputbox>
+					</col>
+				</display>
+				<sql>
+					<select>
+						<value>
+                         <![CDATA[SELECT off_id,off_name,off_price,off_unit from office_supplies]]>
+                        </value>
+					</select>
+					<insert>
+					     <value>
+					     <![CDATA[insert into office_supplies(@{off_name},@{off_price},@{off_unit})]]>
+					     </value>
+					</insert>
+					<update>
+					 <value>
+					     <![CDATA[update office_supplies(@{off_name},@{off_price},@{off_unit}) where off_id=@{off_id}]]>
+					     </value>
+					</update>
+	 				 <delete>
+	 				   <value>
+	 				      <![CDATA[delete from office_supplies where off_id = @{off_id};]]>			            
+	 				   </value>
+			         </delete>
+				</sql>
+			</report>
+		</vpanel>
+	</page>
+</applications>
+	
+	
+	

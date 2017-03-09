@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<applications xmlns="http://www.wabacus.com"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.wabacus.com ../xsd/wabacus.applications.xsd">
+		<page id="inventory" js="/webresources/script/validate.js,/njs/validate.js">
+		 <header>${top.header}</header>
+          	      <vpanel id="common_vpanel" align="center" width="1020px">
+          	      <report id="title" extends="title.report1"></report>
+			<report id="showStock" title="库存信息列表" type="editablelist2" pagesize="8" rowselect="checkbox" dataexport="richexcel|word">
+				 <print type="lodop" include="showStock{-1}" preview="true" jobname="长春大学办公用品库存情况单" printpagesize="1,2380,3380,''"></print>
+				<display>
+				    <col column="{sequence:1}" label="序号" width="57px"></col>
+				    <col column="stock_id" label="库存ID"  displaytype="hidden"></col>
+					<col column="off_name" label="商品名称" clickorderby="true" width="66px"></col>
+					<col column="off_sup_accout" label="库存数量"  clickorderby="true" width="87px"></col>
+					<col column="off_unit" label="单位"  clickorderby="true" width="68px"></col>
+					<col column="off_price" label="商品单价（元）"  clickorderby="true"></col>
+					<col column="warnvalue" label="预警值"  clickorderby="true"></col>
+					<col property="stockState" column="{non-fromdb}" label="库存状态"></col>
+				    <col column="off_sup_time" label="时间" width="304px"></col>
+				</display>
+				<sql>
+				    <value>
+				        <![CDATA[{call query_stock(txtState,txtOff_name,txtOff_sup_accout,txtOff_unit,txtOff_price,txtwarnvalue)}]]>
+				    </value>
+				    <condition name="txtState" label="库存状态">
+				        <value>1</value>
+				        <inputbox type="selectbox">
+						      <option label="全部" value=""></option>
+						      <option label="充足" value="充足"></option>
+						      <option label="警告" value="警告"></option>
+						      <option label="缺货" value="缺货"></option>
+					     </inputbox>
+				    </condition>
+				     <condition name="txtOff_name" label="商品名称">
+								    <value>2</value>
+					      <inputbox type="selectbox">
+                                    <option value="" label="请选择"></option>
+                                    <option dataset="@{select off_id, off_name from office_supplies}" value="off_name" label="off_name"></option>
+                          </inputbox>
+					 </condition>
+					 <condition name="txtOff_sup_accout" hidden="true" label="库存数量">
+							      <value>3</value>
+					</condition>
+					 <condition name="txtOff_unit" hidden="true" label="单位">
+							      <value>4</value>
+					</condition>	
+					<condition name="txtOff_price" hidden="true" label="单价">
+							      <value>5</value>
+					</condition>	
+					 <condition name="txtwarnvalue" hidden="true" label="预警值">
+							      <value>6</value>
+					 </condition>
+					<delete>
+					    <value>
+					        delete from office_stock where stock_id = @{stock_id};
+					    </value>
+					</delete>
+				</sql>
+				<format>
+				    <imports>java.lang.Integer</imports>
+				    <value>
+				        <![CDATA[
+				            int offSupAcoout;
+				            int warnValue;
+				            offSupAcoout = Integer.parseInt(off_sup_accout);
+				            warnValue = Integer.parseInt(warnvalue);
+					         if(offSupAcoout > warnValue){
+					             stockState = "<font color='green'>充足</font>";
+					         }else if(offSupAcoout > 0 && offSupAcoout <= warnValue){
+					             stockState = "<font color='red'>警告</font>";
+					         }else if(offSupAcoout == 0){
+					             stockState = "<font color='gray'>缺货</font>";
+					         }
+				        ]]>
+				    </value>
+				</format>
+			</report>
+			<report id="editInventory" title="添加/修改" type="form"  depends="showStock" dependsparams="txtId=@{stock_id}" interceptor="com.fly.interceptor.StockInterceptor">
+			  <display valuetdwidth="100px" labeltdwidth="71px" labelbgcolor="#f0f0f0" labelalign="right" valuealign="left">
+				    <col column="stock_id" label="库存ID"  displaytype="hidden"></col>
+					<col column="off_sup_name" label="商品名称">
+					    <inputbox type="selectbox" jsvalidate="isNotEmpty(#label#列不允许为空)">
+                                    <option value="" label="请选择"></option>
+                                    <option dataset="@{select off_id, off_name from office_supplies}" value="off_id" label="off_name"></option> 
+                          </inputbox>
+					</col>
+					<col column="off_sup_accout" label="库存数量">
+					    <inputbox jsvalidate="isNotEmpty(#label#列不允许为空);isNotltZero(#label#的值不能小于0)"></inputbox>
+					</col>
+					<col column="warnvalue" label="预警值">
+					    <inputbox jsvalidate="isNotEmpty(#label#列不允许为空);isGtZero(#label#的值必须大于0)"></inputbox>
+					</col>
+				</display>
+				<sql>
+				<select>
+				    <value>
+				          <![CDATA[SELECT office_stock.*, office_supplies.off_name FROM office_stock, office_supplies WHERE office_stock.off_sup_name = office_supplies.off_id and {#condition#}]]>
+					</value>
+					<condition name="txtId" hidden="true" label="Id">
+					       <value>
+								<![CDATA[(stock_id = '#data#' )]]>
+						   </value>
+					</condition>
+				</select>
+					<insert refreshparentonsave="showStock|true">
+						<value>
+							insert into office_stock (@{off_sup_name},@{off_sup_accout}, @{warnvalue});
+						</value>
+					</insert>
+					<update refreshparentonsave="showStock">
+					    <value>
+					        update office_stock (@{off_sup_accout}, @{warnvalue}) where off_sup_name = @{off_sup_name} ;
+					    </value>
+					</update>
+				</sql>
+			</report>
+			</vpanel>
+		</page>
+</applications>

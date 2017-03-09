@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<applications xmlns="http://www.wabacus.com"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.wabacus.com ../xsd/wabacus.applications.xsd">
+	<page xmlns="http://www.wabacus.com" id="apply">
+		<header>${top.header}</header>
+		<vpanel id="common_vpanel" width="1020px" align="center" title="">
+			<report id="title" extends="title.report1"></report>
+			<report id="report1" title="采购申请记录" rowselect="checkbox" type="editablelist"
+				pagesize="8">
+				<display>
+					<col column="{sequence:1}" label="序号" width="46px"></col>
+					<col column="sum_id" label="ID" filter="true" displaytype="hidden"></col>
+					<col column="declear_unit" label="申报单位" displaytype="hidden"></col>
+					<col column="off_name" label="申报办公用品" filter="true" width="108px"/>
+					<col column="sum_account" label="申报数目" width="64px"></col>
+					<col column="off_unit" label="单位" width="54px"></col>
+					<col column="sum_price" label="汇总价格" width="90px" clickorderby="true"></col>
+					<col column="declear_date" label="申报日期" width="108px" clickorderby="true"></col>
+					<col column="declear_man" label="申报人" width="109px"></col>
+					<col column="review_info" label="审核情况" width="99px"></col>
+					<col column="process_advice" label="审核意见" width="279px"></col>
+				</display>
+				 <subdisplay>
+					    <statitems><!-- 定义要用到的统计项 -->
+						     <statitem property="item1" value="count(*)" datatype="int"></statitem>
+						     <statitem property="item2" value="max(sum_price)" datatype="int"></statitem>
+						     <statitem property="item3" value="avg(sum_price)" datatype="float"></statitem>
+						     <statitem property="item4" value="min(sum_price)" datatype="int"></statitem>
+						     <statitem property="item5" value="sum(sum_price)" datatype="float"></statitem>
+					    </statitems>
+					    <subrow displaytype="page|report">
+						     <subcol property="sprop1" colspan="3" valuestyleproperty="bgcolor='#CCFAFF' align='right'"></subcol>
+						     <subcol property="sprop2" colspan="5" valuestyleproperty="bgcolor='#CCFAFF' align='right'"></subcol>
+						     <subcol property="sprop3" colspan="2" valuestyleproperty="bgcolor='#CCFAFF' align='right'"></subcol>
+					    </subrow>
+					    <format>
+						     <imports>
+							      <import>com.wabacus.util.*</import>
+						     </imports>
+						     <value>
+						<![CDATA[
+						    sprop1="记录数： 合计 "+item1+"条";
+							sprop2="最高价格："+item2+"  最低价格："+item4;
+							sprop3="  总价格："+Tools.formatDouble(String.valueOf(item5),"#,###0.00");
+							sprop3="  平均价格："+Tools.formatDouble(String.valueOf(item3),"#,###0.00")+sprop3;
+						]]>
+						</value>
+					    </format>
+				 </subdisplay> 
+				<sql>
+					<select>
+						<value>
+                         <![CDATA[SELECT a.sum_id,a.declear_unit,a.office_name,b.off_name,b.off_unit,a.sum_account,a.sum_price,a.declear_date,a.declear_man,a.review_info,a.process_advice from office_sumary a left join office_supplies b on a.office_name = b.off_id where {#condition#} order by a.declear_date desc]]>
+                        </value>
+                    <condition name="txtdeclear_unit" source="session{group_id}" hidden="true">
+						<value>
+							<![CDATA[declear_unit = #data#]]>
+						</value>
+					</condition>
+					<condition name="review_info" label="审核情况">
+					    <value>
+							<![CDATA[review_info = #data#]]>
+						</value>
+						<inputbox type="selectbox">
+						      <option label="全部" value=""></option>
+						      <option label="无" value="" type="false"></option>
+						      <option label="已审核" value="1"></option>
+						      <option label="未审核" value="2"></option>
+						      <option label="处理中" value="0"></option>
+					     </inputbox>
+					</condition> 
+                   <!--  <condition name="txtdeclear_date2" label="结束日期" labelposition="left">
+                          <inputbox type="datepicker" jsvalidate="isDate(#data#格式不对，必须为yyyy-MM-dd格式)"></inputbox>
+                    </condition> -->
+					</select>
+	 				 <delete>
+	 				   <value>
+	 				      <![CDATA[delete from office_sumary where office_sumary.sum_id = @{sum_id};]]>			            
+	 				   </value>
+                          
+			         </delete>
+	             
+				</sql>
+				<buttons>
+				   <button name="button1" position="title" label="采购申报" extends="${wabacus.button2.default}">
+					   wx_winpage('ShowReport.wx?PAGEID=apply_add',{title:'采购申报',lock:false,width:1050,height:500});
+				   </button>
+			    </buttons>
+				<format>
+					<imports>
+						<import>com.wabacusdemo.util.*</import>
+					</imports>
+					<value>
+					         
+					         review_info=review_info==null?"":review_info.trim();
+					         process_advice=process_advice==null?"":process_advice.trim();
+				            	if(review_info.trim().equals("0")){ 
+				            	<![CDATA[
+                                  review_info = "<font color='#3299CC'>处理中</font>";
+                                  process_advice = "<font color='#3299CC'>等待财务处审核</font>";
+                                 ]]> 
+                                 }  
+					            else if(review_info.trim().equals("1")){ 
+					           <![CDATA[
+                                 review_info = "<font color='green'>已审核</font>";
+                                 process_advice = "<font color='green'>"+process_advice+"</font>";
+                                 
+                               ]]> }
+                                else if(review_info.trim().equals("2")){
+                                <![CDATA[
+                                 review_info = "<font  color='red'>未审核</font>";
+                                 process_advice = "<font color='red'>"+process_advice+"</font>";
+                               ]]>} 
+                     </value>
+				</format>
+			</report>
+		</vpanel>
+	</page>
+	
+	<!-- 采购申报 -->
+	<page xmlns="http://www.wabacus.com"  id="apply_add" js="/webresources/script/validate.js,/wabacusdemo/js/testcallback.js,/webresources/script/col_count.js"  contextmenu="false">
+		 <interceptor>
+			  <imports>
+	  	 		   <import>com.wabacus.util.*</import>
+	  	 	  </imports>
+	  	 	  <preaction>
+	  	 		rrequest.authorize("report1",Consts.DATA_PART,"sum_price","readonly","true");//将report1表单中“总价”列设置为只读
+	  	 	</preaction>
+	  	 </interceptor>
+	  	 <vpanel id="common_vpanel" align="center" margin="20" margin_top="40">
+			<report id="report1" title="采购申报" type="form" dataexport="richexcel">
+				<buttons>
+				  <button name="save" label="确定" extends="${save.button.default}" position="other"></button>
+			    </buttons>
+				<display  valuetdwidth="200px" labeltdwidth="110px" labelbgcolor="#f0f0f0" labelalign="right" valuealign="left" >
+					<col column="sum_id" label="ID" filter="true" displaytype="hidden"></col>
+					<col column="declear_unit" label="申报单位" defaultvalue="session{group_id}" displaytype="hidden">
+					</col>
+					<col column="office_name" label="申报办公用品" br="true">
+					  <inputbox type="selectbox" servervalidate="isNotEmpty(${invalid.isnotempty})">
+						      <option label="请选择" value=""></option>
+						      <option dataset="@{select off_id,off_name from office_supplies}" label="off_name" value="off_id"></option>
+					  </inputbox>
+					</col>
+					<col column="sum_account" label="申报数目" >
+					    <inputbox type="selectbox" styleproperty="onblur='colCount(this)'">
+					          <option label="请选择" value=""></option>
+						      <option value="1" label="1"></option> 
+						      <option value="2" label="2"></option>
+						      <option value="3" label="3"></option> 
+						      <option value="4" label="4"></option>
+						      <option value="5" label="5"></option> 
+						      <option value="6" label="6"></option>
+					     </inputbox>
+					</col>
+					<col column="office_price" label="单价">
+					   <inputbox type="selectbox" depends="office_name" servervalidate="isNotEmpty(${invalid.isnotempty})">
+						      <option dataset="@{select off_price from office_supplies where off_id like '%#office_name#%'}" label="off_price" value="off_price"></option>
+					  </inputbox>
+					</col>
+				    <col column="off_unit" label="单位" br="true">
+					   <inputbox type="selectbox" depends="office_name" servervalidate="isNotEmpty(${invalid.isnotempty})">
+						      <option dataset="@{select off_unit from office_supplies where off_id like '%#office_name#%'}" label="off_unit" value="off_unit"></option>
+					  </inputbox>
+					</col>
+					<col column="sum_price" label="汇总价格"></col>
+					<col column="declear_date" label="申报日期">
+					    <inputbox type="datepicker" dateformat="yyyy-MM-dd" jsvalidate="isNotEmpty(${invalid.isnotempty});isDate(#data#格式不对，必须为yyyy-MM-dd格式)"></inputbox>
+					</col>
+					<col column="using_date" label="拟用日期" br="true">
+					    <inputbox type="datepicker" jsvalidate="isNotEmpty(${invalid.isnotempty});isDate(#data#格式不对，必须为yyyy-MM-dd格式)"></inputbox>
+					</col>
+					<col column="declear_man" label="申报人(及电话)" br="true" datatype="clob" valuestyleproperty="colspan='5'">
+					   <inputbox type="textareabox" jsvalidate="isNotEmpty(${invalid.isnotempty});" styleproperty="rows='2'"></inputbox>
+					</col>
+					<col column="specific_requirements" label="特殊要求" datatype="clob" valuestyleproperty="colspan='5'">
+					  <inputbox type="textareabox" styleproperty="rows='8'"></inputbox>
+					</col>
+					
+				</display>
+				<sql aftersave="configDataModifyAfterSaveCallback1">
+					 <insert>
+					     insert into office_sumary(@{declear_unit},@{office_name},@{sum_account},@{office_price},@{off_unit},@{sum_price},@{declear_date},@{using_date},@{declear_man},@{specific_requirements});
+			         </insert>
+				</sql>
+			</report>
+			<buttons align="center" buttonspacing="20">
+				<button name="confirm" position="bottom" label="确定"
+				refer="report1.save"></button>>
+				<button name="cancel" position="bottom" label="取消"
+					extends="${wabacus.button.default}">
+					artDialog.close();
+				</button>
+		    </buttons>
+			</vpanel>
+	</page>
+</applications>
+	
+	
+	

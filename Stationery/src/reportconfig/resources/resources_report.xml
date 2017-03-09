@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns="http://www.wabacus.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.wabacus.com ../xsd/wabacus.resources.xsd">
+
+	<resource key="top.header" type="com.wabacus.config.resource.TemplateRes">
+  		<![CDATA[
+  		<wx:output value="session{menu_list}" />
+  		]]>
+	</resource>
+	<resource key="system.footer" type="com.wabacus.config.resource.TemplateRes">
+  		<![CDATA[
+	        <div id="footer_div1" align="center">
+               <p align="center">Copyright © 2002-2016 www.qidian.com All Right Reserved版权所有 上海玄霆娱乐信息科技有限公司<br/>
+			               上海玄霆娱乐信息科技有限公司 增值电信业务经营许可证沪B2-20080046 沪网文[2012]0068-008 新出网证（沪）字010 沪ICP备08017520号-1<br/>
+			               请所有作者发布作品时务必遵守国家互联网信息管理办法规定，我们拒绝任何色情小说，一经发现，即作删除！客服电话：010-59357051</p>
+  		]]>
+	</resource>
+</resources>

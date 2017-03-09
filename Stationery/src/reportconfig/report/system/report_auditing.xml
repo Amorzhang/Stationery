@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<applications xmlns="http://www.wabacus.com"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.wabacus.com ../xsd/wabacus.applications.xsd">
+	<page xmlns="http://www.wabacus.com" js="/webresources/script/wabacus_system.js,/webresources/script/validate.js,/webresources/script/testcallback.js"  id="config_auditing">
+		<header>${top.header}</header>
+		<vpanel id="common_vpanel" width="1000px" align="center" title="">
+			<report id="title" extends="title.report1"></report>
+		   <tabpanel id="tab1" titlestyle="2" margin="10">
+			<report id="report1" rowselect="checkbox" title="待审核项目" type="editablelist2"
+				pagesize="8">
+				<display>
+					<col column="{sequence:1}" label="序号"></col>
+					<col column="sum_id" label="ID" filter="true" displaytype="hidden"></col>
+					<col column="declear_unit" label="申报单位" width="98px" filter="true"></col>
+					<col column="off_name" label="申报办公用品" width="128px" filter="true"/>
+					<col column="sum_account" label="申报数目"></col>
+					<col column="sum_price" label="汇总价格" clickorderby="true"></col>
+					<col column="declear_date" label="申报日期" clickorderby="true"></col>
+					<col column="declear_man" label="申报人"></col>
+					<col column="review_info" label="审核情况"></col>
+					<col property="checkOrdeal" column="{non-fromdb}" label="审核·处理">
+					</col>
+				</display>
+				 <subdisplay>
+					    <statitems><!-- 定义要用到的统计项 -->
+						     <statitem property="item1" value="count(*)" datatype="int"></statitem>
+						     <statitem property="item2" value="max(sum_price)" datatype="int"></statitem>
+						     <statitem property="item3" value="avg(sum_price)" datatype="float"></statitem>
+						     <statitem property="item4" value="min(sum_price)" datatype="int"></statitem>
+						     <statitem property="item5" value="sum(sum_price)" datatype="float"></statitem>
+					    </statitems>
+					    <subrow displaytype="page|report">
+						     <subcol property="sprop1" colspan="2" valuestyleproperty="bgcolor='#CCFAFF' align='right'"></subcol>
+						     <subcol property="sprop2" colspan="4" valuestyleproperty="bgcolor='#CCFAFF' align='right'"></subcol>
+						     <subcol property="sprop3" colspan="4" valuestyleproperty="bgcolor='#CCFAFF' align='right'"></subcol>
+					    </subrow>
+					    <format>
+						     <imports>
+							      <import>com.wabacus.util.*</import>
+						     </imports>
+						     <value>
+						<![CDATA[
+						    sprop1="记录数： 合计 "+item1+"条";
+							sprop2="最高价格："+item2+"  最低价格："+item4;
+							sprop3="  总价格："+Tools.formatDouble(String.valueOf(item5),"#,###0.00");
+							sprop3="  平均价格："+Tools.formatDouble(String.valueOf(item3),"#,###0.00")+sprop3;
+						]]>
+						</value>
+					    </format>
+				 </subdisplay>
+				<sql>
+					<select>
+						<value>
+                         <![CDATA[SELECT a.sum_id,a.declear_unit,a.office_name,b.off_name,a.sum_account,a.sum_price,a.declear_date,a.declear_man,a.review_info from office_sumary a left join office_supplies b on a.office_name = b.off_id where a.review_info = 0]]>
+                        </value>
+					</select>
+	 				 <delete>
+	 				   <value>
+	 				      <![CDATA[delete from office_sumary where office_sumary.sum_id = @{sum_id};]]>			            
+	 				   </value>
+                          
+			         </delete>
+				</sql>
+				<buttons>
+				   <button name="button1" position="title" label="一键审核" extends="${wabacus.button2.default}">
+					   wx_winpage('ShowReport.wx?PAGEID=config_auditing_add2',{title:'审核|操作',lock:false,width:600,height:300});
+				   </button>
+			    </buttons>
+				<format>
+					<imports>
+						<import>com.wabacusdemo.util.*</import>
+					</imports>
+					<value>
+					   <![CDATA[
+					           checkOrdeal = "<a href='javascript:void(0)' onclick=\"wx_winpage('ShowReport.wx?PAGEID=config_auditing_add&txtsum_id="+sum_id+"',{title:'审核|操作',lock:true,width:600,height:300})\"><font color='blue'>操作</font></a>";
+					           review_info=review_info==null?"":review_info.trim();
+				            	if(review_info.trim().equals("0")) 
+				            	
+                                  review_info = "<font color='#3299CC'>处理中</font>";
+					            else if(review_info.trim().equals("1")) 
+					            
+                                 review_info = "<font color='green'>已审核</font>";
+                                else if(review_info.trim().equals("2"))
+                                
+                                 review_info = "<font  color='red'>未审核</font>";
+                               ]]>                    	
+                    
+                     </value>
+				</format>
+			</report>
+			
+			<report id="report2" dataexport="richexcel|word" rowselect="checkbox" title="已处理项" type="editablelist2"
+				pagesize="8">
+			   <print type="lodop" include="report2{-1}" preview="true" jobname="长春大学办公用品出库单" printpagesize="1,2380,3380,''"></print>
+				<display>
+					<col column="{sequence:1}" label="序号"></col>
+					<col column="sum_id" label="ID" filter="true" displaytype="hidden"></col>
+					<col column="declear_unit" label="申报单位" width="98px" filter="true"></col>
+					<col column="off_name" label="申报办公用品" width="128px" filter="true"/>
+					<col column="sum_account" label="申报数目"></col>
+					<col column="sum_price" label="汇总价格" clickorderby="true"></col>
+					<col column="declear_date" label="申报日期" clickorderby="true"></col>
+					<col column="declear_man" label="申报人"></col>
+					<col column="review_info" label="审核情况"></col>
+					<col column="review_date" label="审核日期"></col>
+					<col property="checkOrdeal" column="{non-fromdb}" label="审核·处理">
+					</col>
+				</display>
+				 <subdisplay>
+					    <statitems><!-- 定义要用到的统计项 -->
+						     <statitem property="item1" value="count(*)" datatype="int"></statitem>
+						     <statitem property="item2" value="max(sum_price)" datatype="int"></statitem>
+						     <statitem property="item3" value="avg(sum_price)" datatype="float"></statitem>
+						     <statitem property="item4" value="min(sum_price)" datatype="int"></statitem>
+						     <statitem property="item5" value="sum(sum_price)" datatype="float"></statitem>
+					    </statitems>
+					    <subrow displaytype="page|report">
+						     <subcol property="sprop1" colspan="2" valuestyleproperty="bgcolor='#CCFAFF' align='right'"></subcol>
+						     <subcol property="sprop2" colspan="5" valuestyleproperty="bgcolor='#CCFAFF' align='right'"></subcol>
+						     <subcol property="sprop3" colspan="4" valuestyleproperty="bgcolor='#CCFAFF' align='right'"></subcol>
+					    </subrow>
+					    <format>
+						     <imports>
+							      <import>com.wabacus.util.*</import>
+						     </imports>
+						     <value>
+						<![CDATA[
+						    sprop1="记录数： 合计 "+item1+"条";
+							sprop2="最高价格："+item2+"  最低价格："+item4;
+							sprop3="  总价格："+Tools.formatDouble(String.valueOf(item5),"#,###0.00");
+							sprop3="  平均价格："+Tools.formatDouble(String.valueOf(item3),"#,###0.00")+sprop3;
+						]]>
+						</value>
+					    </format>
+				 </subdisplay>
+				<sql>
+					<select>
+						<value>
+                         <![CDATA[SELECT a.sum_id,a.declear_unit,a.office_name,b.off_name,a.sum_account,a.sum_price,a.declear_date,a.declear_man,a.review_info,a.review_date from office_sumary a left join office_supplies b on a.office_name = b.off_id where {#condition#} and a.review_info>0 order by a.review_date desc]]>
+                        </value>
+                        <condition name="review_info" label="审核情况">
+					    <value>
+							<![CDATA[review_info = #data#]]>
+						</value>
+						<inputbox type="selectbox">
+						      <option label="全部" value=""></option>
+						      <option label="无" value="" type="false"></option>
+						      <option label="已审核" value="1"></option>
+						      <option label="未审核" value="2"></option>
+					     </inputbox>
+					</condition> 
+					</select>
+	 				 <delete>
+	 				   <value>
+	 				      <![CDATA[delete from office_sumary where office_sumary.sum_id = @{sum_id};]]>			            
+	 				   </value>
+                          
+			         </delete>
+	             
+				</sql>
+				<format>
+					<imports>
+						<import>com.wabacusdemo.util.*</import>
+					</imports>
+					<value>
+					   <![CDATA[
+					           checkOrdeal = "<a href='javascript:void(0)' onclick=\"wx_winpage('ShowReport.wx?PAGEID=config_auditing_add1&txtsum_id="+sum_id+"',{title:'审核|操作',lock:true,width:600,height:300})\"><font color='blue'>操作</font></a>";
+					           review_info=review_info==null?"":review_info.trim();
+				            	if(review_info.trim().equals("0")) 
+				            	
+                                  review_info = "<font color='#3299CC'>处理中</font>";
+					            else if(review_info.trim().equals("1")) 
+					            
+                                 review_info = "<font color='green'>已审核</font>";
+                                else if(review_info.trim().equals("2"))
+                                
+                                 review_info = "<font  color='red'>未审核</font>";
+                                 
+                                 review_date=review_date==null?"":review_date.trim();
+                                  if(review_date.trim().equals(""))
+                                  
+                                  review_date = "无";
+                               ]]>                    	
+                    
+                     </value>
+				</format>
+			</report>
+			<footer><![CDATA[<h3><font color='red'>说明：</font><font color='blue'>“一键审核”按钮将所有未审核数据进行审核,如果使用将为所有未审核数据进行同样操作</font></h3>]]></footer>
+		</tabpanel>
+		</vpanel>
+	</page>
+	<page id="config_auditing_add" height="350px" width="550px" js="/webresources/component/artDialog/artDialog.js,/webresources/script/wabacus_system.js,/webresources/script/validate.js,js/demo.js,/webresources/script/testcallback.js">
+		 <interceptor>
+			  <imports>
+	  	 		   <import>com.wabacus.util.*</import>
+	  	 		   <import>javax.servlet.*</import>
+	  	 		    <import>javax.servlet.http.HttpServletResponse</import>
+	  	 	  </imports>
+	  	 	  <preaction>
+	  	 		rrequest.authorize("report1",Consts.DATA_PART,"off_name","readonly","true");
+	  	 	</preaction>
+	  	 </interceptor>
+	  	<vpanel id="common_vpanel" align="center" margin="20" margin_top="40">
+		<report id="report1" title="审核·处理" type="form" refreshparentonsave="true">
+		    <buttons>
+			  <button name="save" label="确定" extends="${save.button.default}" position="other"></button>
+		    </buttons>
+			<display>
+				<col column="sum_id" label="id" displaytype="hidden"></col>
+				<col column="off_name" label="名称" br="true" valuestyleproperty="colspan='3'"></col>
+				<col column="review_info" label="状态" valuestyleproperty="colspan='3'" br="true">
+					<inputbox type="radiobox">
+						<option label="已审核" value="1"></option>
+						<option label="未审核" value="2"></option>
+						<option label="处理中" value="0"></option>
+					</inputbox>
+				</col>
+				<col column="review_date" label="审核日期" valuestyleproperty="colspan='3'" br="true">
+					 <inputbox type="datepicker" jsvalidate="isNotEmpty(${invalid.isnotempty});isDate(#data#格式不对，必须为yyyy-MM-dd格式)"></inputbox>
+				</col>
+				<col column="process_advice" label="处理·审核意见" valuestyleproperty="colspan='3'" clickorderby="true">
+					<inputbox type="textareabox" styleproperty="rows='3'" servervalidate="isNotEmpty(${invalid.isnotempty})"></inputbox>
+				</col>
+			</display>
+			<sql aftersave="configDataModifyAfterSaveCallback1">
+				<select>
+					<value>
+						<![CDATA[SELECT a.sum_id,a.office_name,b.off_name,a.review_info,a.review_date,a.process_advice from office_sumary a left join office_supplies b on a.office_name = b.off_id where {#condition#}]]>
+					</value>
+					<condition name="txtsum_id" hidden="true">
+						<value>
+							<![CDATA[(a.sum_id like '%#data#%')]]>
+						</value>
+					</condition>				
+				</select>
+				<update>
+					<value>
+						update office_sumary (@{review_info},@{review_date},@{process_advice}) where sum_id = @{sum_id};
+					</value>
+				</update>
+			</sql>
+		</report>
+		<buttons align="center" buttonspacing="20">
+				<button name="confirm" position="bottom" label="确定"
+				refer="report1.save"></button>>
+				<button name="cancel" position="bottom" label="取消"
+					extends="${wabacus.button.default}">
+					artDialog.close();
+				</button>
+		</buttons>
+		</vpanel>
+	</page>
+	<page id="config_auditing_add2" height="350px" width="550px" js="/webresources/component/artDialog/artDialog.js,/webresources/script/validate.js,js/demo.js,/webresources/script/testcallback.js">
+	  	<vpanel id="common_vpanel" align="center" margin="20" margin_top="40">
+		<report id="report1" title="审核·处理" type="form">
+			<buttons>
+			        <button name="save" label="确定" extends="${save.button.default}" position="other"></button>
+	        </buttons>
+			<display>
+				<col column="review_info" label="状态" valuestyleproperty="colspan='3'" br="true">
+					<inputbox type="radiobox">
+						<option label="已审核" value="1"></option>
+						<option label="未审核" value="2"></option>
+						<option label="处理中" value="0"></option>
+					</inputbox>
+				</col>
+				<col column="review_date" label="审核日期" valuestyleproperty="colspan='3'" br="true">
+					 <inputbox type="datepicker" jsvalidate="isNotEmpty(${invalid.isnotempty});isDate(#data#格式不对，必须为yyyy-MM-dd格式)"></inputbox>
+				</col>
+				<col column="process_advice" label="处理·审核意见" valuestyleproperty="colspan='3'" clickorderby="true">
+					<inputbox type="textareabox" styleproperty="rows='3'" servervalidate="isNotEmpty(${invalid.isnotempty})"></inputbox>
+				</col>
+			</display>
+			<sql aftersave="configDataModifyAfterSaveCallback3">
+				<select>
+					<value>
+						<![CDATA[SELECT review_info,review_date,process_advice from office_sumary where review_info = 0]]>
+					</value>
+				</select>
+				<update>
+					<value>
+						update office_sumary (@{review_info},@{review_date},@{process_advice}) where review_info = 0;
+					</value>
+				</update>
+			</sql>
+		</report>
+		<buttons align="center" buttonspacing="20">
+				<button name="confirm" position="bottom" label="确定"
+				refer="report1.save"></button>>
+				<button name="cancel" position="bottom" label="取消"
+					extends="${wabacus.button.default}">
+					artDialog.close();
+				</button>
+		</buttons>
+		</vpanel>
+	</page>
+	
+	<page id="config_auditing_add1" height="350px" width="550px" js="/webresources/component/artDialog/artDialog.js,/webresources/script/wabacus_system.js,/webresources/script/validate.js,js/demo.js,/webresources/script/testcallback.js">
+		 <interceptor>
+			  <imports>
+	  	 		   <import>com.wabacus.util.*</import>
+	  	 		   <import>javax.servlet.*</import>
+	  	 		    <import>javax.servlet.http.HttpServletResponse</import>
+	  	 	  </imports>
+	  	 	  <preaction>
+	  	 		rrequest.authorize("report1",Consts.DATA_PART,"off_name","readonly","true");
+	  	 	</preaction>
+	  	 </interceptor>
+	  	<vpanel id="common_vpanel" align="center" margin="20" margin_top="40">
+		<report id="report1" title="审核·处理" type="form" refreshparentonsave="true">
+		    <buttons>
+			  <button name="save" label="确定" extends="${save.button.default}" position="other"></button>
+		    </buttons>
+			<display>
+				<col column="sum_id" label="id" displaytype="hidden"></col>
+				<col column="off_name" label="名称" br="true" valuestyleproperty="colspan='3'"></col>
+				<col column="review_info" label="状态" valuestyleproperty="colspan='3'" br="true">
+					<inputbox type="radiobox">
+						<option label="已审核" value="1"></option>
+						<option label="未审核" value="2"></option>
+						<option label="处理中" value="0"></option>
+					</inputbox>
+				</col>
+				<col column="review_date" label="审核日期" valuestyleproperty="colspan='3'" br="true">
+					 <inputbox type="datepicker" jsvalidate="isNotEmpty(${invalid.isnotempty});isDate(#data#格式不对，必须为yyyy-MM-dd格式)"></inputbox>
+				</col>
+				<col column="process_advice" label="处理·审核意见" valuestyleproperty="colspan='3'" clickorderby="true">
+					<inputbox type="textareabox" styleproperty="rows='3'" servervalidate="isNotEmpty(${invalid.isnotempty})"></inputbox>
+				</col>
+			</display>
+			<sql aftersave="configDataModifyAfterSaveCallback2">
+				<select>
+					<value>
+						<![CDATA[SELECT a.sum_id,a.office_name,b.off_name,a.review_info,a.review_date,a.process_advice from office_sumary a left join office_supplies b on a.office_name = b.off_id where {#condition#}]]>
+					</value>
+					<condition name="txtsum_id" hidden="true">
+						<value>
+							<![CDATA[(a.sum_id like '%#data#%')]]>
+						</value>
+					</condition>				
+				</select>
+				<update>
+					<value>
+						update office_sumary (@{review_info},@{review_date},@{process_advice}) where sum_id = @{sum_id};
+					</value>
+				</update>
+			</sql>
+		</report>
+		<buttons align="center" buttonspacing="20">
+				<button name="confirm" position="bottom" label="确定"
+				refer="report1.save"></button>>
+				<button name="cancel" position="bottom" label="取消"
+					extends="${wabacus.button.default}">
+					artDialog.close();
+				</button>
+		</buttons>
+		</vpanel>
+	</page>
+</applications>
+	
+	
+	

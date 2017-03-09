@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<applications xmlns="http://www.wabacus.com"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.wabacus.com ../xsd/wabacus.applications.xsd">
+		<page id="outstock">
+		 <header>${top.header}</header>
+          	      <vpanel id="common_vpanel" align="center" width="1020px">
+          	      <report id="title" extends="title.report1"></report>
+			<report id="showOutstock" title="出库信息列表" type="editablelist" rowselect="checkbox" dataexport="richexcel|word">
+				<print type="lodop" include="showOutstock{-1}" preview="true" jobname="长春大学办公用品出库单" printpagesize="1,2380,3380,''"></print>
+				<display>
+				    <col column="{sequence:1}" label="序号" width="57px"></col>
+				    <col column="out_id" label="出库ID"  displaytype="hidden"></col>
+					<col column="off_name" label="商品名称"  clickorderby="true" filter="condition{txtoff_sup_name}" width="94px"></col>
+					<col column="outprice" label="商品单价（元）"  clickorderby="true" width="79px"></col>
+					<col column="outnumber" label="商品数量"  clickorderby="true" width="95px"></col>
+					<col column="off_unit" label="单位"  clickorderby="true" width="77px"></col>
+				    <col column="outtolprice" label="金额（元）"  clickorderby="true" width="125px"></col>
+				    <col column="out_date" label="出库日期" width="180px"></col>
+					<col column="receive_man" label="领用人"  clickorderby="true"  filter="condition{txtreceive_man}" width="137px"></col>
+				</display>
+				<sql>
+					<select>	
+						<value>
+							  <![CDATA[SELECT outstock.* ,office_supplies.off_name, office_supplies.off_unit FROM outstock,office_supplies WHERE outstock.off_id=office_supplies.off_id and {#condition#} order by out_date desc, out_id]]>
+						</value>
+						<condition name="txtoff_sup_name" label="商品名称">
+						    <value>
+								<![CDATA[(office_supplies.off_name like '%#data#%' )]]>
+							</value>
+							 <inputbox type="selectbox">
+                                    <option value="" label="请选择"></option>
+                                    <option dataset="@{select off_id, off_name from office_supplies}" value="off_name" label="off_name"></option>
+                             </inputbox>
+					       </condition>
+					       <condition name="txtOutprice" label="单价（元）" hidden="true">
+                                       <value>
+                                             <![CDATA[outprice = '#data#']]>
+                                       </value>
+                            </condition>
+						   <condition name="txtout_account" label="商品数量" hidden="true">
+							      <value>
+							          	<![CDATA[(outnumber = '#data#')]]>
+							      </value>
+						   </condition>	
+					       <condition name="txtout_date" label="出库日期">
+		                                       <inputbox type="datepicker" dateformat="yyyy-MM-dd HH:mm:ss" styleproperty="style='width:150px'"></inputbox>
+		                                       <value>
+		                                              <![CDATA[out_date > '#data#']]>
+		                                       </value>
+		                   </condition>
+		                   <condition name="txtreceive_man" label="领用人">
+							      <value>
+							          	<![CDATA[(receive_man like '%#data#%')]]>
+							      </value>
+						   </condition>	
+					</select>
+					<insert pageurl="report{editOutStock.editOutStockReport}" popupparams="{title:'新增出库库信息',width:1050,height:500}"/>
+                    <update pageurl="report{editOutStock.editOutStockReport}" urlparams="txtid=@{out_id}" popupparams="{title:'修改出库信息',width:1050,height:500}"/>
+					<delete>
+					    <value>
+					        delete from outstock where out_id = @{out_id};
+					    </value>
+					</delete>
+				</sql>
+			</report>
+			</vpanel>
+		</page>
+		
+		 <page id="editOutStock" js="/webresources/script/validate.js,/njs/tools.js">
+            <vpanel id="common_vpanel" align="center" margin="20" margin_top="40">              
+                <report id="editOutStockReport" title="详细资料" type="editabledetail" interceptor="com.fly.interceptor.OutStockInterceptor">
+                   <buttons>
+				      <button name="save" label="确定" extends="${save.button.default}" position="other"></button>
+			       </buttons>
+                   <display labeltdwidth="71px" valuetdwidth="100px" labelbgcolor="#f0f0f0" labelalign="right" valuealign="left">
+                       <col column="out_id" displaytype="hidden"></col>
+                       <col column="off_id" label="商品名称">
+                            <inputbox styleproperty="onchange='queryOutprice()'"  type="selectbox" jsvalidate="isNotEmpty(#label#列不允许为空)">
+                                    <option value="" label="请选择"></option>
+                                   <option dataset="@{select off_id, off_name from office_supplies}" value="off_id" label="off_name"></option>
+                            </inputbox>
+                       </col>
+                       <col column="outprice" label="单价（元）" br="true">
+                            <inputbox jsvalidate="isNotEmpty(#label#列不允许为空)"/>                  		       
+                       </col>
+                       <col column="outnumber" label="数量">
+                            <inputbox styleproperty="onblur='outcolCount()'"  jsvalidate="isNotEmpty(#label#列不允许为空)"/>
+                       </col>
+                       <col column="outtolprice"  label="金额（元）" br="true">
+                            <inputbox  jsvalidate="isNotEmpty(#label#列不允许为空)"/>
+                       </col>
+                       <col column="receive_man" label="领用人" br="true">
+                           <inputbox jsvalidate="isNotEmpty(#label#列不允许为空)"/>
+                       </col>
+                   </display>
+                   <sql>                  
+                       <select>
+                              <value>
+                                    <![CDATA[select * from outstock where {#condition#}]]>
+                              </value>
+                              <condition name="txtid" hidden="true">
+                                    <value>
+                                         <![CDATA[out_id = '#data#']]>
+                                    </value> 
+                              </condition>
+                       </select>
+                       <insert>
+                              <![CDATA[
+                                   insert into outstock (@{off_id},@{outprice},@{outnumber},@{outtolprice},@{receive_man});
+							       update office_stock set off_sup_accout=off_sup_accout-@{outnumber} where off_sup_name=@{off_id};
+                              ]]>
+                       </insert>
+                       <update>
+                              <![CDATA[
+					               update outstock (@{off_id},@{outprice},@{outnumber},@{outtolprice},@{receive_man}) where off_id = @{off_id}
+                               ]]>
+                       </update>
+                   </sql>    
+                </report>
+                <buttons align="center" buttonspacing="20">
+						<button name="confirm" position="bottom" label="确定"
+						refer="editOutStockReport.save"></button>>
+						<button name="cancel" position="bottom" label="取消"
+							extends="${wabacus.button.default}">
+							artDialog.close();
+						</button>
+		        </buttons>
+                </vpanel>
+          </page>
+</applications>

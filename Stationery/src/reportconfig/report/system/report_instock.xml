@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<applications xmlns="http://www.wabacus.com"
+					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+					xsi:schemaLocation="http://www.wabacus.com ../xsd/wabacus.applications.xsd">
+          <page id="inStock" js="/webresources/script/validate.js">
+            <header>${top.header}</header>
+          	      <vpanel id="common_vpanel" align="center" width="1020px">
+          	      <report id="title" extends="title.report1"></report>
+                <report id="InStockReport" title="入库信息" type="editablelist" dataexport="richexcel" rowselect="checkbox">
+                  <print type="lodop" include="InStockReport{-1}" preview="true" jobname="长春大学办公用品入库单" printpagesize="1,2380,3380,''"></print>
+                    <display>
+                        <col column="id" label="入库ID" displaytype="hidden"></col>
+                        <col column="{sequence:1}" label="序号" width="57px"></col>
+                        <col column="off_name" label="商品名称" filter="condition{txtoff_name}" clickorderby="true" width="94px"></col> 
+                        <col column="inprice" label="单价（元）" filter="condition{txtInprice}" clickorderby="true" width="79px"></col>
+                        <col column="innumber" label="数量" filter="condition{txtInnumber}" clickorderby="true" width="95px"></col>
+                        <col column="off_unit" label="单位"  clickorderby="true" width="77px"></col>
+                        <col column="intolprice" label="金额（元）" filter="condition{intolprice}" clickorderby="true" width="125px"></col>
+                        <col column="intime" label="入库日期" width="180px"></col>
+                        <col column="inpeople" label="经手人" filter="condition{txtInpeople}" clickorderby="true" width="137px"></col>
+                    </display>
+                    <sql>
+                        <select>
+                              <value>
+                                   <![CDATA[select instock.*, office_supplies.off_name, office_supplies.off_unit from instock, office_supplies where instock.off_id = office_supplies.off_id and {#condition#} order by intime desc, id]]>
+                              </value>                             
+                              <condition name="txtoff_name" label="商品名称">
+                                      <value>
+                                            <![CDATA[office_supplies.off_name like '%#data#%']]>
+                                      </value>
+                                      <inputbox type="selectbox">
+		                                    <option value="" label="请选择"></option>
+		                                    <option dataset="@{select off_id, off_name from office_supplies}" value="off_name" label="off_name"></option>
+                             		  </inputbox>
+                              </condition>
+                              <condition name="txtInprice" label="单价（元）" hidden="true">
+                                       <value>
+                                             <![CDATA[inprice = '#data#']]>
+                                       </value>
+                              </condition>
+                              <condition name="txtInnumber" label="数量" hidden="true">
+                                       <value>
+                                             <![CDATA[innumber = '#data#']]>
+                                       </value>
+                              </condition>
+                              <condition name="intolprice" label="金额（元）" hidden="true">
+                                       <value>
+                                             <![CDATA[intolprice = '#data#']]>
+                                       </value>
+                              </condition>
+                              <condition name="txtIntime" label="入库日期">
+                                       <inputbox type="datepicker" dateformat="yyyy-MM-dd HH:mm:ss" styleproperty="style='width:150px'"></inputbox>
+                                       <value>
+                                              <![CDATA[intime > '#data#']]>
+                                       </value>
+                              </condition>
+                              <condition name="txtInpeople" label="经手人"> 
+                                       <value>
+                                              <![CDATA[inpeople like '%#data#%']]>
+                                       </value>
+                              </condition>
+                        </select>
+                        <insert pageurl="report{editInstock.editInstockReport}" popupparams="{title:'新增入库信息',width:1050,height:500}"/>
+                        <update pageurl="report{editInstock.editInstockReport}" urlparams="txtid=@{id}" popupparams="{title:'修改入库信息',width:1050,height:500}"/>
+                        <delete>
+                             <![CDATA[delete from instock where id=@{id};]]>
+                        </delete>
+                    </sql>
+                </report>
+                </vpanel>
+          </page>
+          
+          <page id="editInstock" js="/webresources/script/validate.js,/njs/tools.js">
+            <vpanel id="common_vpanel" align="center" margin="20" margin_top="40">
+                <report id="editInstockReport" title="详细资料" type="editabledetail" interceptor="com.fly.interceptor.InStockInterceptor">
+                    <buttons>
+				      <button name="save" label="确定" extends="${save.button.default}" position="other"></button>
+			       </buttons>
+                   <display labeltdwidth="71px" valuetdwidth="100px" labelbgcolor="#f0f0f0" labelalign="right" valuealign="left">
+                       <col column="id" displaytype="hidden"></col>
+                       <col column="off_id" label="商品名称">
+                            <inputbox styleproperty="onchange='queryInprice()'" type="selectbox" jsvalidate="isNotEmpty(#label#列不允许为空)">
+                                    <option value="" label="请选择"></option>
+                                   <option dataset="@{select off_id, off_name from office_supplies}" value="off_id" label="off_name"></option>
+                            </inputbox>
+                       </col>
+                       <col column="inprice" label="单价（元）" br="true">
+                            <inputbox jsvalidate="isNotEmpty(#label#列不允许为空)"/>                  		       
+                       </col>
+                       <col column="innumber" label="数量">
+                            <inputbox styleproperty="onblur='incolCount()'"  jsvalidate="isNotEmpty(#label#列不允许为空)"/>
+                       </col>
+                       <col column="intolprice"  label="金额（元）" br="true">
+                            <inputbox  jsvalidate="isNotEmpty(#label#列不允许为空)"/>
+                       </col>
+                       <col column="inpeople" label="经手人" br="true">
+                           <inputbox jsvalidate="isNotEmpty(#label#列不允许为空)"/>
+                       </col>
+                   </display>
+                   <sql>                  
+                       <select>
+                              <value>
+                                    <![CDATA[select * from instock where {#condition#}]]>
+                              </value>
+                              <condition name="txtid" hidden="true">
+                                    <value>
+                                         <![CDATA[id = '#data#']]>
+                                    </value> 
+                              </condition>
+                       </select>
+                       <insert>
+                              <![CDATA[
+                                  insert into instock (@{off_id},@{inprice},@{innumber},@{intolprice},@{inpeople});
+                                  update office_stock set off_sup_accout=off_sup_accout+@{innumber} where off_sup_name=@{off_id}; 
+                              ]]>
+                       </insert>
+                       <update>
+                              <![CDATA[
+                                   update instock (@{off_id},@{inprice},@{innumber},@{intolprice},@{inpeople}) where id=@{id};                            
+                               ]]>
+                       </update>
+                   </sql>    
+                </report>
+                <buttons align="center" buttonspacing="20">
+						<button name="confirm" position="bottom" label="确定"
+						refer="editInstockReport.save"></button>>
+						<button name="cancel" position="bottom" label="取消"
+							extends="${wabacus.button.default}">
+							artDialog.close();
+						</button>
+		        </buttons>
+                </vpanel>
+          </page>
+</applications>
